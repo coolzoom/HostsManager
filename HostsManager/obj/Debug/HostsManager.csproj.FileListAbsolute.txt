@@ -1,0 +1,26 @@
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\bin\Debug\HostsManager.exe.config
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\bin\Debug\HostsManager.exe
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\bin\Debug\HostsManager.pdb
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\obj\Debug\HostsManager.csprojResolveAssemblyReference.cache
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\obj\Debug\HostsManager.Form1.resources
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\obj\Debug\HostsManager.Properties.Resources.resources
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\obj\Debug\HostsManager.csproj.GenerateResource.Cache
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\obj\Debug\HostsManager.exe
+c:\users\administrator\documents\visual studio 2015\Projects\HostsManager\HostsManager\obj\Debug\HostsManager.pdb
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\bin\Debug\HostsManager.exe.config
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\bin\Debug\HostsManager.exe
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\bin\Debug\HostsManager.pdb
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\obj\Debug\HostsManager.Form1.resources
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\obj\Debug\HostsManager.Properties.Resources.resources
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\obj\Debug\HostsManager.csproj.GenerateResource.Cache
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\obj\Debug\HostsManager.exe
+C:\Users\wangcz\Desktop\HostsManager\HostsManager\obj\Debug\HostsManager.pdb
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\bin\Debug\HostsManager.exe.config
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\obj\Debug\HostsManager.exe
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\obj\Debug\HostsManager.pdb
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\bin\Debug\HostsManager.exe
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\obj\Debug\HostsManager.csprojResolveAssemblyReference.cache
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\obj\Debug\HostsManager.Form1.resources
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\obj\Debug\HostsManager.Properties.Resources.resources
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\obj\Debug\HostsManager.csproj.GenerateResource.Cache
+C:\Users\wangcz\Desktop\技术整理\HostsManager\HostsManager\bin\Debug\HostsManager.pdb
