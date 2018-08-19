@@ -1,6 +1,6 @@
 ﻿namespace HostsManager
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.lbHosts = new System.Windows.Forms.ListBox();
             this.lbIPS = new System.Windows.Forms.ListBox();
             this.btnLoadHosts = new System.Windows.Forms.Button();
@@ -38,6 +38,7 @@
             this.btnOpenHosts = new System.Windows.Forms.Button();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // lbHosts
@@ -86,7 +87,9 @@
             this.tbHosts.Name = "tbHosts";
             this.tbHosts.Size = new System.Drawing.Size(286, 21);
             this.tbHosts.TabIndex = 5;
-            this.tbHosts.Text = "127.0.0.1 e.2345.com";
+            this.tbHosts.Text = "示例：127.0.0.1 localhost;127.0.0.1 local";
+            this.tbHosts.Enter += new System.EventHandler(this.tbHosts_Enter);
+            this.tbHosts.Leave += new System.EventHandler(this.tbHosts_Leave);
             // 
             // btnAddHosts
             // 
@@ -122,6 +125,12 @@
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip1_ItemClicked);
             // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 6000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -137,9 +146,9 @@
             this.Name = "Form1";
             this.Text = "HostsManager";
             this.TopMost = true;
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.Resize += new System.EventHandler(this.Form1_Resize);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -155,6 +164,7 @@
         private System.Windows.Forms.Button btnOpenHosts;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 

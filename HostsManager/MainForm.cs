@@ -12,39 +12,74 @@ using System.Windows.Forms;
 
 namespace HostsManager
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
-
-            //this.WindowState = FormWindowState.Minimized;
-            //this.Hide();
         }
 
+        // 全部变量，基本的配置信息
+        // Host文件的绝对路径
         private const string hostsFilePath = @"C:\Windows\System32\drivers\etc\hosts";
+        // 域名和IP对应关系字典
         private static Dictionary<string,List<string>> hostsDic;
-        private static Dictionary<string, string> hosts2IP;
+        // 域名对应的最终生效的IP地址
+        private static Dictionary<string, string> domainToIP;
+        // 本地主机
         private const string localhost = "localhost";
+        // 不绑定任何IP，走域名解析DNS
         private const string disabledIP = "不指定IP地址";
+        // 换行符
         private static string lineBreak = "\r\n";
         private static bool isNeedSwitch = false;
-        private static bool isClose = false;
+        //是否退出程序，false-仅关闭窗口、true-退出主程序
+        private static bool isExitMain = false;
 
-        private void Form1_Load(object sender, EventArgs e)
+        /// <summary>
+        /// 窗口加载入口
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            initLoad();
+        }
+
+        /// <summary>
+        /// 手动重新加载hosts文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnLoadHosts_Click(object sender, EventArgs e)
+        {
+            initLoad();
+        }
+
+        /// <summary>
+        /// 定时器触发
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            // 每个60秒，重新加载一次Hosts文件，重新渲染托盘图标的左键菜单
+            initLoad();
+        }
+
+        private void initLoad()
         {
             lbHosts.Items.Clear();
             hostsDic = new Dictionary<string, List<string>>();
-            hosts2IP = new Dictionary<string, string>();
-            // 1-读取hosts文件
-            string hostsContent = this.Read(Form1.hostsFilePath);
-            //label1.Text = hostsContent;
-            
-            foreach (KeyValuePair<string,List<string>> item in hostsDic)
+            domainToIP = new Dictionary<string, string>();
+            // 1-加载hosts文件
+            this.LoadHosts(hostsFilePath);
+
+            foreach (KeyValuePair<string, List<string>> item in hostsDic)
             {
                 // 2-加载主界面域名列表
                 lbHosts.Items.Add(item.Key);
-                
+
                 // 3-加载通知栏菜单
                 ToolStripMenuItem itemTool = (ToolStripMenuItem)contextMenuStrip1.Items.Add(item.Key);
                 ToolStripMenuItem itemDropDisabledIP = (ToolStripMenuItem)itemTool.DropDownItems.Add(disabledIP);
@@ -52,12 +87,12 @@ namespace HostsManager
                 itemDropDisabledIP.Click += new EventHandler(tsmiClick1);//绑定方法
                 itemDropDisabledIP.ForeColor = Color.Red;
 
-                string ipSetted = hosts2IP.ContainsKey(item.Key) ? hosts2IP[item.Key] : "";
+                string ipSetted = domainToIP.ContainsKey(item.Key) ? domainToIP[item.Key] : "";
                 foreach (string ip in item.Value)
                 {
                     ToolStripMenuItem itemDrop = (ToolStripMenuItem)itemTool.DropDownItems.Add(ip);
                     itemDrop.ToolTipText = item.Key;
-                    if(ip == ipSetted)
+                    if (ip == ipSetted)
                     {
                         itemDrop.ForeColor = Color.Red;
                         itemDropDisabledIP.ForeColor = Color.Black;
@@ -70,6 +105,11 @@ namespace HostsManager
             contextMenuStrip1.Items.Add("退出");
         }
 
+        /// <summary>
+        /// 单击托盘图标的菜单项
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tsmiClick1(object sender, EventArgs e)
         {
             ToolStripMenuItem itemDrop = (ToolStripMenuItem)sender;
@@ -79,43 +119,45 @@ namespace HostsManager
                 item.ForeColor = Color.Black;
             }
             itemDrop.ForeColor = Color.Red;
-            //MessageBox.Show(itemDrop.ToolTipText + itemDrop.Text);
-            setHostIP(itemDrop.ToolTipText, itemDrop.Text);
+            bindDomainToIp(itemDrop.ToolTipText, itemDrop.Text);
         }
 
-        private string Read(string path)
+        /// <summary>
+        /// 加载hosts文件内容，生成字典
+        /// </summary>
+        /// <param name="path">hosts文件的绝对路径</param>
+        private void LoadHosts(string path)
         {
-            hosts2IP = new Dictionary<string, string>();
+            domainToIP = new Dictionary<String, String>();
             StreamReader sr = new StreamReader(path, Encoding.Default);
             String line;
-            string content = "";
-            string lineString = "";
-            List<string> ipList = new List<string>();
+            String lineString = "";
+            List<String> ipList = new List<String>();
             while ((line = sr.ReadLine()) != null)
             {
                 lineString  = line.ToString().Replace("#", "").Trim();
                 //lbHosts.Items.Add(line.ToString());
                 // trim之后，第一个字符不是数据则跳过
-                if (lineString.Length>0 && this.isNumberic(lineString.Substring(0,1)))
+                if (lineString.Length>0 && Common.isNumberic(lineString.Substring(0,1)))
                 {
-                    List<string> lineDomain = MatchsDomain(lineString);
+                    List<string> lineDomain = Common.matchsDomain(lineString);
                     // 兼容localhost
                     if (lineDomain.Count == 1 && lineString.IndexOf(localhost) >0)
                     {
-                        genHostsDic(lineDomain[0], localhost);
+                        generateHostsDic(lineDomain[0], localhost);
                         //lbHosts.Items.Add(lineDomain[0]);
                         //lbHosts.Items.Add(localhost);
 
                         if (line.ToString().IndexOf("#") < 0)
                         {
                             //设置每个域名对应的IP地址，判断是否含有字符#
-                            if (hosts2IP.ContainsKey(localhost))
+                            if (domainToIP.ContainsKey(localhost))
                             {
-                                hosts2IP[localhost] = lineDomain[0];
+                                domainToIP[localhost] = lineDomain[0];
                             }
                             else
                             {
-                                hosts2IP.Add(localhost, lineDomain[0]);
+                                domainToIP.Add(localhost, lineDomain[0]);
                             }
                         }
                     }
@@ -123,102 +165,49 @@ namespace HostsManager
                     // 添加到hosts列表中
                     if (lineDomain.Count == 2)
                     {
-                        genHostsDic(lineDomain[0], lineDomain[1]);
+                        generateHostsDic(lineDomain[0], lineDomain[1]);
                         //lbHosts.Items.Add(lineDomain[0]);
                         //lbHosts.Items.Add(lineDomain[1]);
 
                         if (line.ToString().IndexOf("#") < 0)
                         {
                             //设置每个域名对应的IP地址，判断是否含有字符#
-                            if (hosts2IP.ContainsKey(lineDomain[1]))
+                            if (domainToIP.ContainsKey(lineDomain[1]))
                             {
-                                hosts2IP[lineDomain[1]] = lineDomain[0];
+                                domainToIP[lineDomain[1]] = lineDomain[0];
                             }
                             else
                             {
-                                hosts2IP.Add(lineDomain[1], lineDomain[0]);
+                                domainToIP.Add(lineDomain[1], lineDomain[0]);
                             }
                         }
                     }
                 }
             }
             sr.Close();
-            return content;
         }
 
-        private static void genHostsDic(string ip,string domain)
+        /// <summary>
+        /// 生成HostsDic，添加新的绑定关系到HostsDic字典中
+        /// </summary>
+        /// <param name="ip">IP地址</param>
+        /// <param name="domain">域名</param>
+        private static void generateHostsDic(string ip,string domain)
         {
             List<string> ipList = new List<string>();
             if (hostsDic.ContainsKey(domain))
             {
                 ipList = hostsDic[domain];
-                ipList.Add(ip);
-                hostsDic[domain] = ipList;
             }
-            else
-            {
-                ipList.Add(ip);
-                hostsDic[domain] = ipList;
-            }
+            ipList.Add(ip);
+            hostsDic[domain] = ipList;
         }
 
-        private void Write(string path,string content, System.Text.Encoding encoding)
-        {
-            File.WriteAllText(path, content);
-            //FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            //StreamWriter sw = new StreamWriter(fs, Encoding.Default);
-
-            //sw.Write(content);
-            //sw.Close();
-            //fs.Close();
-        }
-
-        private bool isNumberic(string message)
-        {
-            System.Text.RegularExpressions.Regex rex =
-            new System.Text.RegularExpressions.Regex(@"^\d+$");
-            int result = -1;
-            if (rex.IsMatch(message))
-            {
-                result = int.Parse(message);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>  
-        /// 匹配获取字符串中所有的域名  
-        /// </summary>  
-        /// <param name="input"></param>  
-        /// <returns></returns>  
-        public static List<string> MatchsDomain(string input)
-        {
-            string pattern = @"[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+";
-            return Matchs(input, pattern);
-        }
-        /// <summary>  
-        /// 匹配结果  返回匹配结果的数组  
-        /// </summary>  
-        /// <param name="input"></param>  
-        /// <param name="expression"></param>  
-        /// <returns></returns>  
-        public static List<string> Matchs(string input, string expression)
-        {
-            List<string> list = new List<string>();
-            MatchCollection collection = Regex.Matches(input, expression, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-            foreach (Match item in collection)
-            {
-                if (item.Success)
-                {
-                    list.Add(item.Value);
-                }
-            }
-            return list;
-        }
-
+        /// <summary>
+        /// 切换域名
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lbHosts_SelectedIndexChanged(object sender, EventArgs e)
         {
             isNeedSwitch = false;
@@ -240,7 +229,7 @@ namespace HostsManager
             lbIPS.Items.Add(disabledIP);
             lbIPS.SelectedIndex = index;
             List<string> ipList = hostsDic[domain];
-            string ipSetted = hosts2IP.ContainsKey(domain) ? hosts2IP[domain] : "";
+            string ipSetted = domainToIP.ContainsKey(domain) ? domainToIP[domain] : "";
             foreach(string ip in ipList)
             {
                 lbIPS.Items.Add(ip);
@@ -254,6 +243,11 @@ namespace HostsManager
             isNeedSwitch = true;
         }
 
+        /// <summary>
+        /// 选中指定ip，将选中的域名绑定到选中的ip
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lbIPS_SelectedIndexChanged(object sender, EventArgs e)
         {
             if(isNeedSwitch == false)
@@ -265,10 +259,15 @@ namespace HostsManager
             {
                 return;
             }
-            setHostIP(domain, lbIPS.SelectedItem.ToString());
+            bindDomainToIp(domain, lbIPS.SelectedItem.ToString());
         }
 
-        private void setHostIP(string domain, string ip)
+        /// <summary>
+        /// 绑定域名到指定的IP
+        /// </summary>
+        /// <param name="domain">域名</param>
+        /// <param name="ip">IP</param>
+        private void bindDomainToIp(string domain, string ip)
         {
             if (domain.Length <= 0)
             {
@@ -286,9 +285,9 @@ namespace HostsManager
                 lineString = line.ToString().Replace("#", "").Trim();
                 //lbHosts.Items.Add(line.ToString());
                 // trim之后，第一个字符不是数据则跳过
-                if (lineString.Length > 0 && this.isNumberic(lineString.Substring(0, 1)))
+                if (lineString.Length > 0 && Common.isNumberic(lineString.Substring(0, 1)))
                 {
-                    List<string> lineDomain = MatchsDomain(lineString);
+                    List<string> lineDomain = Common.matchsDomain(lineString);
                     // 兼容localhost
                     if (lineDomain.Count == 1 && lineString.IndexOf(localhost) > 0)
                     {
@@ -335,27 +334,18 @@ namespace HostsManager
                 content += ip + " " + domain + lineBreak;
             }
             sr.Close();
-            Write(hostsFilePath, content, Encoding.Default);
+            Common.write(hostsFilePath, content, Encoding.Default);
         }
 
-        private void btnLoadHosts_Click(object sender, EventArgs e)
-        {
-            hostsDic = new Dictionary<string, List<string>>();
-            // 1-读取hosts文件
-            string hostsContent = this.Read(Form1.hostsFilePath);
-            //label1.Text = hostsContent;
-
-            lbHosts.Items.Clear();
-            foreach (KeyValuePair<string, List<string>> item in hostsDic)
-            {
-                lbHosts.Items.Add(item.Key);
-            }
-        }
-
+        /// <summary>
+        /// 添加一个或者多个域名绑定
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnAddHosts_Click(object sender, EventArgs e)
         {
             string ipHosts = tbHosts.Text.ToString().Replace("#", "").Trim();
-            List<string> lineDomain = MatchsDomain(ipHosts);
+            List<string> lineDomain = Common.matchsDomain(ipHosts);
             // 判断数据是否合法，格式是否正确
 
             string domain = lineDomain[1];
@@ -376,9 +366,9 @@ namespace HostsManager
                 lineString = line.ToString().Replace("#", "").Trim();
                 //lbHosts.Items.Add(line.ToString());
                 // trim之后，第一个字符不是数据则跳过
-                if (lineString.Length > 0 && this.isNumberic(lineString.Substring(0, 1)))
+                if (lineString.Length > 0 && Common.isNumberic(lineString.Substring(0, 1)))
                 {
-                    lineDomain = MatchsDomain(lineString);
+                    lineDomain = Common.matchsDomain(lineString);
                     // 兼容localhost
                     if (lineDomain.Count == 1 && lineString.IndexOf(localhost) > 0)
                     {
@@ -407,13 +397,10 @@ namespace HostsManager
                 content += ip + " " + domain + lineBreak;
             }
             sr.Close();
-            Write(hostsFilePath, content, Encoding.Default);
+            Common.write(hostsFilePath, content, Encoding.Default);
 
-            // 重新加载Hosts
-            hostsDic = new Dictionary<string, List<string>>();
-            // 1-读取hosts文件
-            string hostsContent = this.Read(Form1.hostsFilePath);
-            //label1.Text = hostsContent;
+            // 1-加载hosts文件，重新加载Hosts
+            this.LoadHosts(MainForm.hostsFilePath);
 
             lbHosts.Items.Clear();
             foreach (KeyValuePair<string, List<string>> item in hostsDic)
@@ -422,22 +409,53 @@ namespace HostsManager
             }
         }
 
+        /// <summary>
+        /// 记事本打开hosts文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnOpenHosts_Click(object sender, EventArgs e)
         {
             // 打开文件
             System.Diagnostics.Process.Start("notepad.exe", hostsFilePath);
         }
 
+        /// <summary>
+        /// 退出主程序
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {            
             if (e.ClickedItem.Text == "退出")
             {
-                isClose = true;
+                isExitMain = true;
                 this.Close();
             }
         }
 
-        private void Form1_Resize(object sender, EventArgs e)
+        /// <summary>
+        /// 关闭主程序
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!isExitMain)
+            {
+                this.Hide();
+                this.ShowInTaskbar = false;
+                this.notifyIcon1.Visible = true;
+                e.Cancel = true;
+            }
+        }
+
+        /// <summary>
+        /// 主程序窗口缩放
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_Resize(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Minimized)
             {
@@ -447,6 +465,11 @@ namespace HostsManager
             }
         }
 
+        /// <summary>
+        /// 双击托盘图标，显示程序主界面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void notifyIcon1_DoubleClick(object sender, EventArgs e)
         {
             this.Show();
@@ -454,18 +477,31 @@ namespace HostsManager
             {
                 this.WindowState = FormWindowState.Normal;
             }
-            //this.notifyIcon1.Visible = false;
-            //this.ShowInTaskbar = true;
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        /// <summary>
+        /// 输入框成为活动控件是，清空示例内容，以便输入
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tbHosts_Enter(object sender, EventArgs e)
         {
-            if(!isClose)
+            if(tbHosts.Text == "示例：127.0.0.1 localhost;127.0.0.1 local")
             {
-                this.Hide();
-                this.ShowInTaskbar = false;
-                this.notifyIcon1.Visible = true;
-                e.Cancel = true;
+                tbHosts.Text = "";
+            }
+        }
+
+        /// <summary>
+        /// 输入框失去焦点后，如果内容为空，重新设置提示信息
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tbHosts_Leave(object sender, EventArgs e)
+        {
+            if (tbHosts.Text.Trim() == "")
+            {
+                tbHosts.Text = "示例：127.0.0.1 localhost;127.0.0.1 local";
             }
         }
     }
