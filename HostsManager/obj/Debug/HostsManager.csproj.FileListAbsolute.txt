@@ -33,3 +33,13 @@ D:\wamp\HostsManager\HostsManager\obj\Debug\HostsManager.csproj.CoreCompileInput
 D:\wamp\HostsManager\HostsManager\obj\Debug\HostsManager.exe
 D:\wamp\HostsManager\HostsManager\obj\Debug\HostsManager.pdb
 D:\wamp\HostsManager\HostsManager\obj\Debug\HostsManager.MainForm.resources
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\bin\Debug\HostsManager.exe.config
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\bin\Debug\HostsManager.exe
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\bin\Debug\HostsManager.pdb
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\obj\Debug\HostsManager.csprojAssemblyReference.cache
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\obj\Debug\HostsManager.MainForm.resources
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\obj\Debug\HostsManager.Properties.Resources.resources
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\obj\Debug\HostsManager.csproj.GenerateResource.cache
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\obj\Debug\HostsManager.csproj.CoreCompileInputs.cache
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\obj\Debug\HostsManager.exe
+C:\Users\wangcz\Documents\GitHub\HostsManager\HostsManager\obj\Debug\HostsManager.pdb

@@ -70,6 +70,7 @@ namespace HostsManager
         private void initLoad()
         {
             lbHosts.Items.Clear();
+            contextMenuStrip1.Items.Clear();
             hostsDic = new Dictionary<string, List<string>>();
             domainToIP = new Dictionary<string, string>();
             // 1-加载hosts文件
